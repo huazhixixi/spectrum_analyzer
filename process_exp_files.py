@@ -47,13 +47,20 @@ class ReadData(QWidget):
         self.ui.savematButton.clicked[bool].connect(self.save_mat)
 
 
+
+        self.default_dir = None
+
     @pyqtSlot(bool)
     def bat_processing_csv(self):
-        file_names,_ = QFileDialog.getOpenFileNames(self, 'open files', './', 'data (*.csv)')
+
         save_dir = self.ui.saveDirLineEdit.text()
+        if not(self.ui.isSavematRaido.isChecked()) and not self.ui.isSavenpz.isChecked():
+            QMessageBox.warning(None, 'error', 'please chose save format', QMessageBox.Yes)
+            return
         if not save_dir:
             QMessageBox.warning(None, 'error', 'please input save dir', QMessageBox.Yes)
             return
+        file_names, _ = QFileDialog.getOpenFileNames(self, 'open files', './', 'data (*.csv)')
 
         if file_names:
             group_number = len(file_names)//4
@@ -64,9 +71,9 @@ class ReadData(QWidget):
             for ith_group in range(group_number):
                 ch1,ch2,ch3,ch4 = file_names[4*ith_group:4*ith_group+4]
                 if self.ui.isSavematRaido.isChecked():
-                    read_data(ch1,ch2,ch3,ch4,None,save_dir + ith_group +'.mat',False)
+                    read_data(ch1,ch2,ch3,ch4,None,save_dir+'/' + str(ith_group) +'.mat',False)
                 if self.ui.isSavenpz.isChecked():
-                    read_data(ch1,ch2,ch3,ch4,save_dir + ith_group +'.npz',None,True)
+                    read_data(ch1,ch2,ch3,ch4,save_dir +'/' + str(ith_group) +'.npz',None,True)
 
 
 
