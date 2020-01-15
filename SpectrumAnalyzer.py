@@ -48,14 +48,17 @@ class SpectrumAnalyzer(QWidget):
             if self.ui.FFTPoint.text():
                 fft_point = float(self.ui.FFTPoint.text())
             chidu = self.ui.Ychidu.currentText()
-            self.analyzer = CalculateSpectrum(self.data, fs, fft_point, window='hann')
-            self.analyzer.calc_finshed.connect(self.plot_spectrum)
-            self.analyzer.start()
-
         except Exception as e:
             QMessageBox.warning(None,'error',str(e),QMessageBox.Yes)
             return
+        if self.data is None:
+            QMessageBox.warning(None, 'error', 'please read datasamples first', QMessageBox.Yes)
+            return
 
+
+        self.analyzer = CalculateSpectrum(self.data, fs, fft_point, window='hann')
+        self.analyzer.calc_finshed.connect(self.plot_spectrum)
+        self.analyzer.start()
 
     @pyqtSlot(np.ndarray,np.ndarray)
     def plot_spectrum(self,f,spectrum):
@@ -76,7 +79,6 @@ class SpectrumAnalyzer(QWidget):
         fname,_ = QFileDialog.getOpenFileName(self,'open files','./','data (*.npz *.mat)')
         try:
             if fname.endswith('.npz'):
-                import numpy as np
                 self.data = np.load(fname)['arr_0']
 
             if fname.endswith('.mat'):
@@ -84,9 +86,6 @@ class SpectrumAnalyzer(QWidget):
                 self.data = loadmat(fname)['samples']
         except Exception as e:
             QMessageBox.warning(None, 'error', 'open file error'+str(e), QMessageBox.Yes)
-
-
-
         try:
             self.data = np.atleast_2d(self.data)[:,:2**16]
         except Exception as e:
@@ -99,28 +98,12 @@ class SpectrumAnalyzer(QWidget):
 
 
 
-
-
-import numpy as np
-class ceshi(QWidget):
-    signal = pyqtSignal(np.ndarray)
-
-    def emit(self):
-        self.signal.emit(np.array([1,2,3]))
-
-    def slot(self,array):
-        # print(array)
-        print(type(array))
-
-
-
-if __name__ == '__main__':
+def main():
     import sys
     app = QApplication(sys.argv)
     analyzer = SpectrumAnalyzer()
     analyzer.show()
-    #
-    # c = ceshi()
-    # c.signal.connect(c.slot)
-    # c.emit()
     sys.exit(app.exec())
+if __name__ == '__main__':
+    main()
+
