@@ -43,11 +43,11 @@ class SpectrumAnalyzer(QWidget):
     @pyqtSlot(bool)
     def analyze_spectrum(self,is_clicked):
         try:
-            if self.ui.fs.text():
-                fs = float(self.ui.fs.text())
-            if self.ui.FFTPoint.text():
-                fft_point = float(self.ui.FFTPoint.text())
-            chidu = self.ui.Ychidu.currentText()
+
+            fs = float(self.ui.fs.text())
+
+            fft_point = float(self.ui.FFTPoint.text())
+            self.chidu = self.ui.Ychidu.currentText().lower()
         except Exception as e:
             QMessageBox.warning(None,'error',str(e),QMessageBox.Yes)
             return
@@ -66,6 +66,12 @@ class SpectrumAnalyzer(QWidget):
         spectrum = np.atleast_2d(spectrum)
         f = f[0]
         self.ui.graphicsView.clear()
+
+        if self.chidu =='linear':
+            spectrum = 10**(spectrum/10)
+        elif self.chidu =='log':
+            pass
+
         for i in range(spectrum.shape[0]):
             w1 = self.ui.graphicsView.addPlot()
             w1.plot(f,spectrum[i],pen=pg.mkPen('r', width=3))
@@ -89,8 +95,12 @@ class SpectrumAnalyzer(QWidget):
         try:
             self.data = np.atleast_2d(self.data)[:,:2**16]
         except Exception as e:
+            self.data = None
             QMessageBox.warning(None, 'error', str(e), QMessageBox.Yes)
             return
+
+        QMessageBox.information(None,'Successful','Read files sccessful',QMessageBox.Yes)
+
 
     @pyqtSlot(bool)
     def on_ClearFig_clicked(self, is_clicked):
